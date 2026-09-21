@@ -259,6 +259,38 @@ Task.WaitAny(new[] { stopRecognition.Task });
 // await speechRecognizer.StopContinuousRecognitionAsync();
 ```
 
+## Client-requested segmentation
+
+In continuous recognition, segmentation is automatically handled by the service. However, certain applications require the client to explicitly control segmentation in addition to the automatic handling. For example, in conversational voice scenarios, the client may implement its own turn detection logic and needs to force a segmentation at turn boundaries so that speech occurring before and after the boundary is delivered in separate final recognition results.
+
+You can use `PushAudioInputStream.Commit()` to send a segmentation boundary signal to the service.
+
+```csharp
+using var audioStream = AudioInputStream.CreatePushStream();
+using var audioConfig = AudioConfig.FromStreamInput(audioStream);
+using var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
+
+speechRecognizer.Recognized += (s, e) =>
+{
+    if (e.Result.Reason == ResultReason.RecognizedSpeech)
+    {
+        Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+    }
+    else if (e.Result.Reason == ResultReason.NoMatch)
+    {
+        Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+    }
+};
+await speechRecognizer.StartContinuousRecognitionAsync();
+
+// Byte[] audioBytes = ReadAudioBytesOfATurn();
+
+audioStream.Write(audioBytes);
+
+audioStream.Commit();
+
+```
+
 ## Change the source language
 
 A common task for speech recognition is specifying the input (or source) language. The following example shows how to change the input language to Italian. In your code, find your [`SpeechConfig`](/dotnet/api/microsoft.cognitiveservices.speech.speechconfig) instance and add this line directly below it:
