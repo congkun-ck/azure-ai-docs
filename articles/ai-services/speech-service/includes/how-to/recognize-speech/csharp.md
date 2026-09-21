@@ -259,7 +259,7 @@ Task.WaitAny(new[] { stopRecognition.Task });
 // await speechRecognizer.StopContinuousRecognitionAsync();
 ```
 
-## Client-requested segmentation
+## Client-requested segmentation (Preview)
 
 In continuous recognition, segmentation is automatically handled by the service. However, certain applications require the client to explicitly control segmentation in addition to the automatic handling. For example, in conversational voice scenarios, the client may implement its own turn detection logic and needs to force a segmentation at turn boundaries so that speech occurring before and after the boundary is delivered in separate final recognition results.
 
@@ -283,13 +283,16 @@ speechRecognizer.Recognized += (s, e) =>
 };
 await speechRecognizer.StartContinuousRecognitionAsync();
 
-// Byte[] audioBytes = ReadAudioBytesOfATurn();
+// Reading audio data into audioBytes;
 
 audioStream.Write(audioBytes);
 
 audioStream.Commit();
 
 ```
+
+> [!NOTE]
+> Commit() does not support [MAS](../../../audio-processing-speech-sdk.md) or [compressed audio](../../../how-to-use-codec-compressed-audio-input-streams?pivots=programming-language-csharp) yet.
 
 ## Change the source language
 
